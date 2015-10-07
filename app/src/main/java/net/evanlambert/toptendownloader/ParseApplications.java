@@ -1,6 +1,5 @@
 package net.evanlambert.toptendownloader;
 
-import android.app.Application;
 import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -18,7 +17,7 @@ public class ParseApplications {
 
     public ParseApplications(String xmlData) {
         this.xmlData = xmlData;
-        applications = new ArrayList<Applications>();
+        applications = new ArrayList<>();
     }
 
     public ArrayList<Applications> getApplications() {
@@ -27,8 +26,8 @@ public class ParseApplications {
 
     public boolean process() {
         boolean status = true;
-        Application currentRecord;
-        boolean inEntry = true;
+        Applications currentRecord = null;
+        boolean inEntry = false;
         String textValue = "";
 
         try {
@@ -42,16 +41,32 @@ public class ParseApplications {
                 String tagName = xpp.getName();
                 switch(eventType) {
                     case XmlPullParser.START_TAG:
-                        Log.d("ParseApplications", "Starting tag for " + tagName);
+                        //Log.d("ParseApplications", "Starting tag for " + tagName);
                         if(tagName.equalsIgnoreCase("entry")) {
                             inEntry = true;
-                            currentRecord = new Application();
+                            currentRecord = new Applications();
 
                         }
                         break;
 
+                    case XmlPullParser.TEXT:
+                        textValue = xpp.getText();
+                        break;
+
                     case XmlPullParser.END_TAG:
-                         Log.d("ParseApplications", "Ending tag for " + tagName);
+                         //Log.d("ParseApplications", "Ending tag for " + tagName);
+                        if(inEntry) {
+                            if(tagName.equalsIgnoreCase("entry")) {
+                                applications.add(currentRecord);
+                                inEntry = false;
+                            } else if(tagName.equalsIgnoreCase("name")) {
+                                currentRecord.setName(textValue);
+                            } else if (tagName.equalsIgnoreCase("artist")) {
+                                currentRecord.setArtist(textValue);
+                            } else if (tagName.equalsIgnoreCase("releasedate")) {
+                                currentRecord.setReleaseDate(textValue);
+                            }
+                        }
                          break;
                 }
 
@@ -63,6 +78,14 @@ public class ParseApplications {
         } catch(Exception e) {
             status = false;
             e.printStackTrace();
+        }
+
+        for (Applications app : applications) {
+            Log.d("ParseApplications", "*************");
+            Log.d("ParseApplications", "Name: " + app.getName());
+            Log.d("ParseApplications", "Artist: " + app.getArtist());
+            Log.d("ParseApplications", "Release Date: " + app.getReleaseDate());
+
         }
 
 

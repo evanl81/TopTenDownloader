@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
@@ -35,10 +36,17 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 ParseApplications parseApplications = new ParseApplications(mFileContents);
                 parseApplications.process();
+                ArrayAdapter<Applications> arrayAdapter = new ArrayAdapter<Applications> (
+                        MainActivity.this, R.layout.list_item, parseApplications.getApplications());
+                listApps.setAdapter(arrayAdapter);
+
             }
+
         });
+
         DownloadData downloadData = new DownloadData();
         downloadData.execute("http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=10/xml");
+
     }
 
     @Override
